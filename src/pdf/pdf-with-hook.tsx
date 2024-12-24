@@ -2,7 +2,7 @@ import { usePDF } from '@react-pdf/renderer'
 import MyDocument from './sample-pdf'
 
 const PdfComponent = () => {
-  const [instance, updateInstance] = usePDF({ document: MyDocument() })
+  const [instance, _] = usePDF({ document: MyDocument() })
 
   if (instance.loading) return <div>Loading ...</div>
 

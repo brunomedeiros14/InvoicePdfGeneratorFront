@@ -28,12 +28,12 @@ const ClientSchema = z.object({
   phoneNumber: z.string().nonempty({ message: 'Phone Number is required' }),
 })
 
-const ProductSchema = z.object({
-  code: z.number().nonnegative({ message: 'Code must be a positive number' }),
-  description: z.string().nonempty({ message: 'Description is required' }),
-  unitValue: z.nativeEnum(UnitValueEnum),
-  price: z.number().nonnegative({ message: 'Price must be a positive number' }),
-})
+// const ProductSchema = z.object({
+//   code: z.number().nonnegative({ message: 'Code must be a positive number' }),
+//   description: z.string().nonempty({ message: 'Description is required' }),
+//   unitValue: z.nativeEnum(UnitValueEnum),
+//   price: z.number().nonnegative({ message: 'Price must be a positive number' }),
+// })
 
 const FormSchema = z.object({
   client: ClientSchema,
