@@ -18,6 +18,13 @@ import PdfComponent from '../pdf/pdf-with-hook'
 import MyDocument from '../pdf/sample-pdf'
 import { UnitValueEnum } from '../types/product'
 import { ModeToggle } from './mode-toggle'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './ui/select'
 
 const ClientSchema = z.object({
   name: z.string().nonempty({ message: 'Name is required' }),
@@ -165,7 +172,7 @@ export function InputForm() {
           />
         </div>
 
-        <div className="flex flex-col justify-between lg:flex-row">
+        <div className="flex justify-between">
           <h2>Produtos</h2>
           <Button
             type="button"
@@ -183,7 +190,10 @@ export function InputForm() {
         </div>
         <div className="rounded-lg border p-4">
           {fields.map((field, index) => (
-            <div key={field.id} className="flex w-fit items-end gap-4">
+            <div
+              key={field.id}
+              className="flex w-fit flex-col gap-4 lg:flex-row lg:items-end"
+            >
               <FormField
                 control={form.control}
                 name={`products.${index}.code`}
@@ -215,14 +225,22 @@ export function InputForm() {
                 name={`products.${index}.unitValue`}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Unit Value</FormLabel>
-                    <FormControl>
-                      <select {...field}>
-                        <option value={UnitValueEnum.BOX}>BOX</option>
-                        <option value={UnitValueEnum.UNIT}>UNIT</option>
-                      </select>
-                    </FormControl>
+                    <FormLabel>Unidade</FormLabel>
                     <FormMessage />
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="min-w-[280px]">
+                          <SelectValue placeholder="Selecione o valor" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="BOX">Caixa</SelectItem>
+                        <SelectItem value="UNIT">Unidade</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </FormItem>
                 )}
               />
