@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useFieldArray, useForm } from 'react-hook-form'
-import { z } from 'zod'
+import { any, z } from 'zod'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -12,8 +12,12 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Trash } from 'lucide-react'
+import { BlobProvider, PDFDownloadLink } from '@react-pdf/renderer'
+import { Plus, Trash } from 'lucide-react'
+import PdfComponent from '../pdf/pdf-with-hook'
+import MyDocument from '../pdf/sample-pdf'
 import { UnitValueEnum } from '../types/product'
+import { ModeToggle } from './mode-toggle'
 
 const ClientSchema = z.object({
   name: z.string().nonempty({ message: 'Name is required' }),
@@ -33,7 +37,8 @@ const ProductSchema = z.object({
 
 const FormSchema = z.object({
   client: ClientSchema,
-  products: z.array(ProductSchema),
+  products: z.array(any()),
+  // products: z.array(ProductSchema),
   // .nonempty({ message: 'At least one product is required' }),
 })
 
@@ -75,16 +80,19 @@ export function InputForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <h2>Client Information</h2>
+        <div className="flex justify-between">
+          <h2>Informações do Cliente</h2>
+          <ModeToggle />
+        </div>
         <div className="flex gap-2">
           <FormField
             control={form.control}
             name="client.name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Name</FormLabel>
+                <FormLabel>Nome</FormLabel>
                 <FormControl>
-                  <Input placeholder="Client Name" {...field} />
+                  <Input placeholder="Nome" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -95,9 +103,9 @@ export function InputForm() {
             name="client.address"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Address</FormLabel>
+                <FormLabel>Endereço</FormLabel>
                 <FormControl>
-                  <Input placeholder="Client Address" {...field} />
+                  <Input placeholder="Endereço" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -108,9 +116,9 @@ export function InputForm() {
             name="client.postalCode"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Postal Code</FormLabel>
+                <FormLabel>CEP</FormLabel>
                 <FormControl>
-                  <Input placeholder="Postal Code" {...field} />
+                  <Input placeholder="CEP" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -121,24 +129,22 @@ export function InputForm() {
             name="client.neighborhood"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Neighborhood</FormLabel>
+                <FormLabel>Bairro</FormLabel>
                 <FormControl>
-                  <Input placeholder="Neighborhood" {...field} />
+                  <Input placeholder="Bairro" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-        </div>
-        <div className="flex gap-2">
           <FormField
             control={form.control}
             name="client.city"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>City</FormLabel>
+                <FormLabel>Cidade</FormLabel>
                 <FormControl>
-                  <Input placeholder="City" {...field} />
+                  <Input placeholder="Cidade" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -149,31 +155,43 @@ export function InputForm() {
             name="client.phoneNumber"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Phone Number</FormLabel>
+                <FormLabel>Telefone</FormLabel>
                 <FormControl>
-                  <Input placeholder="Phone Number" {...field} />
+                  <Input placeholder="Telefone" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
-        <h2>Products</h2>
+
+        <div className="flex justify-between">
+          <h2>Produtos</h2>
+          <Button
+            type="button"
+            onClick={() =>
+              append({
+                code: 0,
+                description: '',
+                unitValue: UnitValueEnum.UNIT,
+                price: 0,
+              })
+            }
+          >
+            Adicionar Produto <Plus />
+          </Button>
+        </div>
         <div className="rounded-lg border p-4">
           {fields.map((field, index) => (
-            <div key={field.id} className="flex items-center gap-4">
+            <div key={field.id} className="flex w-fit items-end gap-4">
               <FormField
                 control={form.control}
                 name={`products.${index}.code`}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Code</FormLabel>
+                    <FormLabel>Código</FormLabel>
                     <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="Product Code"
-                        {...field}
-                      />
+                      <Input placeholder="0" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -184,9 +202,9 @@ export function InputForm() {
                 name={`products.${index}.description`}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel>Descrição</FormLabel>
                     <FormControl>
-                      <Input placeholder="Product Description" {...field} />
+                      <Input placeholder="Descrição" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -213,13 +231,9 @@ export function InputForm() {
                 name={`products.${index}.price`}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Price</FormLabel>
+                    <FormLabel>Preço</FormLabel>
                     <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="Product Price"
-                        {...field}
-                      />
+                      <Input placeholder="0.0" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -237,20 +251,25 @@ export function InputForm() {
           ))}
         </div>
 
-        <Button
-          type="button"
-          onClick={() =>
-            append({
-              code: 0,
-              description: '',
-              unitValue: UnitValueEnum.UNIT,
-              price: 0,
-            })
-          }
-        >
-          Add Product
-        </Button>
-        <Button type="submit">Submit</Button>
+        <div className="flex gap-2">
+          <Button type="submit">Teste de envio</Button>
+
+          <PDFDownloadLink document={<MyDocument />} fileName="somename.pdf">
+            <Button>Baixar PDF</Button>
+          </PDFDownloadLink>
+
+          <BlobProvider document={<MyDocument />}>
+            {({ url, loading }) => {
+              if (loading || url == null) return 'Loading document...'
+              return (
+                <a href={url} target="_blank">
+                  <Button>Abrir PDF</Button>
+                </a>
+              )
+            }}
+          </BlobProvider>
+          <PdfComponent />
+        </div>
       </form>
     </Form>
   )
