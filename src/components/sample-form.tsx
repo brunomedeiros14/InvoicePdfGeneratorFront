@@ -84,7 +84,7 @@ export function InputForm() {
           <h2>Informações do Cliente</h2>
           <ModeToggle />
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 lg:flex-row">
           <FormField
             control={form.control}
             name="client.name"
@@ -165,7 +165,7 @@ export function InputForm() {
           />
         </div>
 
-        <div className="flex justify-between">
+        <div className="flex flex-col justify-between lg:flex-row">
           <h2>Produtos</h2>
           <Button
             type="button"
