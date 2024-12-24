@@ -273,7 +273,7 @@ export function InputForm() {
           <Button type="submit">Teste de envio</Button>
 
           <PDFDownloadLink document={<MyDocument />} fileName="somename.pdf">
-            <Button>Baixar PDF</Button>
+            <Button type="button">Baixar PDF</Button>
           </PDFDownloadLink>
 
           <BlobProvider document={<MyDocument />}>
@@ -281,7 +281,7 @@ export function InputForm() {
               if (loading || url == null) return 'Loading document...'
               return (
                 <a href={url} target="_blank">
-                  <Button>Abrir PDF</Button>
+                  <Button type="button">Abrir PDF</Button>
                 </a>
               )
             }}
