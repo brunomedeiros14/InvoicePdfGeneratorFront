@@ -9,7 +9,7 @@ const PdfComponent = () => {
   if (instance.error) return <div>Something went wrong: {instance.error}</div>
 
   return (
-    <a href={instance.url!} download="test.pdf">
+    <a href={instance.url!} className="hidden" download="test.pdf">
       Baixar pdf 'a'
     </a>
   )
