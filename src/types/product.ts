@@ -6,6 +6,6 @@ export type product = {
 }
 
 export enum UnitValueEnum {
-  BOX,
-  UNIT,
+  BOX = 'BOX',
+  UNIT = 'UNIT',
 }

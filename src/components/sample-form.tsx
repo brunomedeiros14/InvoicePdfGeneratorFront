@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { BlobProvider, PDFDownloadLink } from '@react-pdf/renderer'
-import { Plus, Trash } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import PdfComponent from '../pdf/pdf-with-hook'
 import MyDocument from '../pdf/sample-pdf'
 import { UnitValueEnum } from '../types/product'
@@ -35,12 +35,12 @@ const ClientSchema = z.object({
   phoneNumber: z.string().nonempty({ message: 'Phone Number is required' }),
 })
 
-// const ProductSchema = z.object({
-//   code: z.number().nonnegative({ message: 'Code must be a positive number' }),
-//   description: z.string().nonempty({ message: 'Description is required' }),
-//   unitValue: z.nativeEnum(UnitValueEnum),
-//   price: z.number().nonnegative({ message: 'Price must be a positive number' }),
-// })
+const ProductSchema = z.object({
+  code: z.number().nonnegative({ message: 'Code must be a positive number' }),
+  description: z.string().nonempty({ message: 'Description is required' }),
+  unitValue: z.nativeEnum(UnitValueEnum),
+  price: z.number().nonnegative({ message: 'Price must be a positive number' }),
+})
 
 const FormSchema = z.object({
   client: ClientSchema,
@@ -61,13 +61,21 @@ export function InputForm() {
         city: '',
         phoneNumber: '',
       },
-      products: [
-        { code: 0, description: '', unitValue: UnitValueEnum.UNIT, price: 0 },
-      ],
+      products: [],
     },
   })
 
-  const { fields, append, remove } = useFieldArray({
+  const formProduct = useForm<z.infer<typeof ProductSchema>>({
+    resolver: zodResolver(ProductSchema),
+    defaultValues: {
+      code: undefined,
+      description: undefined,
+      unitValue: undefined,
+      price: undefined,
+    },
+  })
+
+  const { append } = useFieldArray({
     control: form.control,
     name: 'products',
   })
@@ -84,124 +92,39 @@ export function InputForm() {
     // })
   }
 
+  function onSubmitProduct(data: z.infer<typeof ProductSchema>) {
+    append(data)
+    formProduct.reset()
+    console.log(formProduct.getValues())
+    // toast({
+    //   title: "You submitted the following values:",
+    //   description: (
+    //     <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
+    //       <code className="text-white">{JSON.stringify(data, null, 2)}</code>
+    //     </pre>
+    //   ),
+    // })
+  }
+
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="flex justify-between">
-          <h2>Informações do Cliente</h2>
+    <>
+      <div className="relative">
+        <h2>Informações do Cliente</h2>
+        <div className="absolute right-0 top-0">
           <ModeToggle />
         </div>
-        <div className="flex flex-col gap-2 lg:flex-row">
-          <FormField
-            control={form.control}
-            name="client.name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nome</FormLabel>
-                <FormControl>
-                  <Input placeholder="Nome" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="client.address"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Endereço</FormLabel>
-                <FormControl>
-                  <Input placeholder="Endereço" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="client.postalCode"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>CEP</FormLabel>
-                <FormControl>
-                  <Input placeholder="CEP" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="client.neighborhood"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Bairro</FormLabel>
-                <FormControl>
-                  <Input placeholder="Bairro" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="client.city"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Cidade</FormLabel>
-                <FormControl>
-                  <Input placeholder="Cidade" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="client.phoneNumber"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Telefone</FormLabel>
-                <FormControl>
-                  <Input placeholder="Telefone" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
 
-        <div className="flex justify-between">
-          <h2>Produtos</h2>
-          <Button
-            type="button"
-            onClick={() =>
-              append({
-                code: 0,
-                description: '',
-                unitValue: UnitValueEnum.UNIT,
-                price: 0,
-              })
-            }
-          >
-            Adicionar Produto <Plus />
-          </Button>
-        </div>
-        <div className="rounded-lg border p-4">
-          {fields.map((field, index) => (
-            <div
-              key={field.id}
-              className="flex w-fit flex-col gap-4 lg:flex-row lg:items-end"
-            >
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <div className="mt-4 flex flex-col gap-2 lg:flex-row">
               <FormField
                 control={form.control}
-                name={`products.${index}.code`}
+                name="client.name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Código</FormLabel>
+                    <FormLabel>Nome</FormLabel>
                     <FormControl>
-                      <Input placeholder="0" {...field} />
+                      <Input placeholder="Nome" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -209,12 +132,12 @@ export function InputForm() {
               />
               <FormField
                 control={form.control}
-                name={`products.${index}.description`}
+                name="client.address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Descrição</FormLabel>
+                    <FormLabel>Endereço</FormLabel>
                     <FormControl>
-                      <Input placeholder="Descrição" {...field} />
+                      <Input placeholder="Endereço" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -222,73 +145,188 @@ export function InputForm() {
               />
               <FormField
                 control={form.control}
-                name={`products.${index}.unitValue`}
+                name="client.postalCode"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Unidade</FormLabel>
-                    <FormMessage />
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="min-w-[280px]">
-                          <SelectValue placeholder="Selecione o valor" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="BOX">Caixa</SelectItem>
-                        <SelectItem value="UNIT">Unidade</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name={`products.${index}.price`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Preço</FormLabel>
+                    <FormLabel>CEP</FormLabel>
                     <FormControl>
-                      <Input placeholder="0.0" {...field} />
+                      <Input placeholder="CEP" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button
-                variant={'destructive'}
-                size={'icon'}
-                type="button"
-                onClick={() => remove(index)}
-              >
-                <Trash />
-              </Button>
+              <FormField
+                control={form.control}
+                name="client.neighborhood"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Bairro</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Bairro" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="client.city"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cidade</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Cidade" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="client.phoneNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Telefone</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Telefone" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
-          ))}
+          </form>
+        </Form>
+
+        <div className="mt-4 grid grid-cols-1 gap-2 lg:grid-cols-2">
+          <div className="space-y-4 rounded border p-2">
+            <Form {...formProduct}>
+              <form
+                onSubmit={formProduct.handleSubmit(onSubmitProduct)}
+                className="space-y-6"
+              >
+                <h2 className="mb-4">Adicione um produto</h2>
+                <div className="grid grid-cols-2 gap-2 lg:flex-row">
+                  <FormField
+                    control={formProduct.control}
+                    name="code"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Código</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Código"
+                            {...field}
+                            onChange={(event) => {
+                              if (isNaN(Number(event.target.value))) return
+                              field.onChange(Number(event.target.value))
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={formProduct.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Descrição</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Descrição" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={formProduct.control}
+                    name="unitValue"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Unidade</FormLabel>
+                        <FormMessage />
+                        <Select onValueChange={field.onChange}>
+                          <FormControl>
+                            <SelectTrigger className="lg:min-w-44">
+                              <SelectValue placeholder="Selecione o valor" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value={UnitValueEnum.BOX.valueOf()}>
+                              Caixa
+                            </SelectItem>
+                            <SelectItem value={UnitValueEnum.UNIT.valueOf()}>
+                              Unidade
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={formProduct.control}
+                    name="price"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Preço</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="0.0"
+                            {...field}
+                            onChange={(e) => {
+                              if (isNaN(Number(e.target.value))) return
+                              field.onChange(Number(e.target.value))
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </form>
+            </Form>
+            <Button onClick={formProduct.handleSubmit(onSubmitProduct)}>
+              Adicionar Produto <Plus />
+            </Button>
+          </div>
+          <div className="flex flex-col rounded border p-2">
+            <h2 className="mb-4">Lista de produtos</h2>
+            <div className="flex h-full items-center justify-center text-muted-foreground">
+              Nenhum produto adicionado
+            </div>
+          </div>
         </div>
+        <div className="row mt-4 flex flex-col gap-2 lg:flex-row">
+          <Button className="hidden" onClick={form.handleSubmit(onSubmit)}>
+            Teste de envio
+          </Button>
 
-        <div className="flex gap-2">
-          <Button type="submit">Teste de envio</Button>
-
-          <PDFDownloadLink document={<MyDocument />} fileName="somename.pdf">
-            <Button type="button">Baixar PDF</Button>
-          </PDFDownloadLink>
+          <Button type="button" asChild>
+            <PDFDownloadLink document={<MyDocument />} fileName="somename.pdf">
+              Baixar PDF
+            </PDFDownloadLink>
+          </Button>
 
           <BlobProvider document={<MyDocument />}>
             {({ url, loading }) => {
-              if (loading || url == null) return 'Loading document...'
+              if (loading || url == null) return 'Carregando o documento...'
               return (
-                <a href={url} target="_blank">
-                  <Button type="button">Abrir PDF</Button>
-                </a>
+                <Button type="button" asChild>
+                  <a className="" href={url} target="_blank">
+                    Abrir PDF
+                  </a>
+                </Button>
               )
             }}
           </BlobProvider>
+
           <PdfComponent />
         </div>
-      </form>
-    </Form>
+      </div>
+    </>
   )
 }
